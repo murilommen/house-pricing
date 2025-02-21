@@ -21,4 +21,7 @@ Then port forwarding to 8080 we get
 >**NOTE**: I had an issue with Kubeflow's proxy agent since it was trying to resolve for a GKE deployment
 >(probably for using Minikube), so I disabled it by scaling its pods to 0 replicas `kubectl scale deployment proxy-agent -n kubeflow --replicas=0`  
 
+## Generate the pipeline
+`PYTHONPATH="$PYTHONPATH:$PWD" python3 src/main.py`
+
 ## Next steps

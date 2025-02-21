@@ -13,7 +13,7 @@ def register_model_to_vertex(model_name: str, rmse: float, gs_artifact_uri: str,
         model = aiplatform.Model.upload(
             display_name=model_name,
             artifact_uri=gs_artifact_uri,
-            serving_container_image_uri=serving_container_uri,
+            serving_container_image_uri=serving_container_uri
         )
         model.deploy(machine_type="n1-standard-4")
         print(f"Model {model_name} registered as version 1.")
