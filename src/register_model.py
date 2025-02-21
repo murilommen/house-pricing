@@ -3,11 +3,8 @@ from typing import Optional
 from google.cloud import aiplatform
 from google.cloud.aiplatform import Model
 
-GS_ARTIFACT_URI = "gs://your-bucket-path"
-SERVING_CONTAINER_URI = "gcr.io/cloud-aiplatform/prediction/xgboost2-cpu:latest"
 
-
-def register_model_to_vertex(model_name: str, rmse: float) -> Optional[Model]:
+def register_model_to_vertex(model_name: str, rmse: float, gs_artifact_uri: str, serving_container_uri: str) -> Optional[Model]:
     model_registry = aiplatform.Model.list(project=model_name)
     
     # No model found, so register the first version
@@ -15,8 +12,8 @@ def register_model_to_vertex(model_name: str, rmse: float) -> Optional[Model]:
         print(f"Registering the first version of {model_name}...")
         model = aiplatform.Model.upload(
             display_name=model_name,
-            artifact_uri=GS_ARTIFACT_URI,
-            serving_container_image_uri=SERVING_CONTAINER_URI,
+            artifact_uri=gs_artifact_uri,
+            serving_container_image_uri=serving_container_uri,
         )
         model.deploy(machine_type="n1-standard-4")
         print(f"Model {model_name} registered as version 1.")
@@ -38,8 +35,8 @@ def register_model_to_vertex(model_name: str, rmse: float) -> Optional[Model]:
             print(f"New model has a lower RMSE. Registering a new version of {model_name}...")
             model = aiplatform.Model.upload(
                 display_name=model_name,
-                artifact_uri=GS_ARTIFACT_URI,
-                serving_container_image_uri=SERVING_CONTAINER_URI,
+                artifact_uri=gs_artifact_uri,
+                serving_container_image_uri=serving_container_uri,
             )
             model.deploy(machine_type="n1-standard-4")
             print(f"Model {model_name} registered as a new version.")
