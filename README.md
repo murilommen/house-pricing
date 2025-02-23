@@ -85,7 +85,7 @@ It would eventually evolve into its own validation step on the Kubeflow pipeline
 For a real-world use case, we could also plug in whylogs' functionalities to compare predictions to ground truth, on a separate Kubeflow pipeline. This could run on a cadence, and be setup to trigger alerts in case performance is degraded.
 But there are so many infra and customer specific decisions to be made, that it felt a little out of the scope for this project to be included here as well.
 
-### (Optional) Deploying KF Pipelines with Minikube + docker
+### (Optional) Deploying KF Pipelines with Minikube + Docker
 
 An alternative is to run the pipeline project entirely on your machine, for which you will need a Kubeflow pipelines component running locally.
 We can do that by deploying it using Minikube, which emulates a real-world Kubernetes environment on the local machine,
@@ -106,7 +106,7 @@ Then port forwarding to 8080 we get
   - in my view, a prod-ready authentication would increase the development time for a significant amount, which would require setting up VPCs, a dedicated Identity Aware Proxy and would consume too much from the scope of this project
 - The pipeline is currently not active and listening to GCS, which would be a nice addition
 - The model is not monitored for predictions, which would require a few assumptions around how often we will get the ground truth, monitoring alert strategies, and other concerns that felt a little out of the scope of this demo.
-- I haven't done any kind of optimization for the model performance, such as an enhanced feature selection, hyperparameter tuning, benchmarking with other models, etc.
+- I haven't done any kind of optimization for the model performance, such as an enhanced feature selection, hyperparameter tuning, benchmarking with other models, etc. beyond the exploration phase. My focus was on the MLOps end, which was already quite tricky to get right.
 - I have generated a local image of the Docker container, pushed it to GCP and used that as the base image for the predictions' container.
   - Since the container will download the respective model version on startup, the core logic will rarely change, so automation on this step felt unnecessary at this point in time 
 
