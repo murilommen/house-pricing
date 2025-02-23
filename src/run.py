@@ -6,7 +6,7 @@ from kfp.compiler import compiler
 
 from src.pipeline import regression_pipeline
 
-credentials, project_id = google.auth.load_credentials_from_file("./level-agent-451514-c0-fc48725fe84a.json")
+credentials, project_id = google.auth.default()
 
 def compile_pipeline(file_name: str) -> None:
     compiler.Compiler().compile(
@@ -33,7 +33,7 @@ def submit_pipeline(file_name: str, pipeline_parameters: Dict[str, str]) -> None
     pipeline_job.submit()
 
 if __name__ == "__main__":
-    pipeline_filename = 'regression_pipeline_v2.json'
+    pipeline_filename = 'regression_pipeline.json'
     pipeline_params = {
         "file_path": "gs://house-pricing-tryolabs/data/train.csv",
         "model_name": "my-first-model",

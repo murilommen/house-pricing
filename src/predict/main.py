@@ -1,5 +1,6 @@
 import os
 import logging
+from typing import Optional
 
 import joblib
 from contextlib import asynccontextmanager
@@ -15,8 +16,16 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # Manually set on the app deployment as of now
-MODEL_ID = os.environ["MODEL_ID"]
 LOCAL_MODEL_DIR = "./model"
+MODEL_ID = os.getenv("MODEL_ID")
+MODEL_VERSION = os.getenv("MODEL_VERSION")
+
+def _get_model_uri_from_version() -> Optional[str]:
+    model_registry = aiplatform.Model.list(filter=f'display_name="{MODEL_ID}"')
+
+    for model in model_registry:
+        if model.version_id == MODEL_VERSION:
+            return model.uri
 
 def download_model():
     """Downloads the model from Vertex AI Model Registry to the current directory."""
@@ -31,9 +40,7 @@ def download_model():
     )
 
     logging.info(f"Fetching model {MODEL_ID} from Vertex AI...")
-    model = aiplatform.Model(model_name=MODEL_ID)
-
-    model_uri = model.uri
+    model_uri = _get_model_uri_from_version()
 
     if not model_uri:
         raise ValueError("Model URI is not available")

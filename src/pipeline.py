@@ -1,24 +1,47 @@
+from typing import List
+
 from kfp import dsl
-from kfp.dsl import Output, Artifact, Input, Model, Dataset
+from kfp.dsl import Output, Input, Model, Dataset
 
 
 @dsl.component(
     base_image="python:3.10",
-    packages_to_install=["pandas", "numpy", "scikit-learn", "gcsfs"])
+    packages_to_install=["pandas", "numpy", "scikit-learn", "gcsfs", "whylogs"])
 def load_data(file_path: str,
                         x_train_output: Output[Dataset],
                         x_test_output: Output[Dataset],
                         y_train_output: Output[Dataset],
                         y_test_output: Output[Dataset]):
     from typing import Tuple
+
     import pandas as pd
     import numpy as np
-
     from sklearn.model_selection import train_test_split
+    import whylogs as why
+    from whylogs.core.constraints import ConstraintsBuilder
+    from whylogs.core.constraints.factories import null_percentage_below_number, is_non_negative
+
+    def validate_target(df: pd.DataFrame) -> Tuple[bool, List[Tuple[str, int, int]]]:
+        profile_view = why.log(df).view()
+
+        builder = ConstraintsBuilder(dataset_profile_view=profile_view)
+        builder.add_constraint(
+            null_percentage_below_number(column_name="SalePrice", number=0.01)
+        )
+        builder.add_constraint(
+            is_non_negative(column_name="SalePrice")
+        )
+        constraints = builder.build()
+        return constraints.validate(), constraints.report()
 
     def get_features_and_target(file_path: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
         df = pd.read_csv(file_path)
         df.drop(columns=["Id"], inplace=True)
+        # Data quality monitoring and validation
+        valid, report = validate_target(df)
+        if not valid:
+            raise ValueError(f"There are validation errors for the target: {report}")
+
         y = np.log1p(df["SalePrice"])
         X = df.drop(columns=["SalePrice"])
         return X, y
@@ -138,14 +161,13 @@ def evaluate_and_register(x_test_input: Input[Dataset],
                 )
                 print(f"Model {model_name} registered as version 1.")
 
-                model.update(labels={"rmse": str(rmse)})
+                model.update(labels={"rmse": str(round(rmse, 2))})
                 return model
             except Exception as e:
                 logging.error(f"Error registering model: {e}")
                 raise
 
         else:
-            # Find existing model (highest version)
             existing_model = None
             highest_version = -1
             for model in model_registry:
