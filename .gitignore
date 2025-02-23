@@ -5,3 +5,4 @@ data/
 */mlruns
 */__pycache__/
 *.json
+*.pkl

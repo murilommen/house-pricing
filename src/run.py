@@ -37,7 +37,6 @@ if __name__ == "__main__":
     pipeline_params = {
         "file_path": "gs://house-pricing-tryolabs/data/train.csv",
         "model_name": "my-first-model",
-        "serving_container_uri": "us-docker.pkg.dev/vertex-ai/prediction/xgboost-cpu.2-1:latest",
         "pipeline_root": "gs://house-pricing-tryolabs/artifacts"
     }
 
